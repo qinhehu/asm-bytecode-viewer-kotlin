@@ -1,0 +1,51 @@
+<idea-plugin version="2">
+    <name>ASM Bytecode Viewer Support Kotlin</name>
+    <description>
+        <![CDATA[
+        <h3>Displays bytecode for Java or Kotlin classes and ASMified code which will help you in your class generation.</h3>
+        <b>Usage: </b>
+        <p>- Open ASM Bytecode Viewer from NavBar > code > ASM Bytecode Viewer</p>]]>
+    </description>
+    <version>1.0.0</version>
+    <vendor>Raven</vendor>
+    <idea-version since-build="141.3058" />
+    <depends>com.intellij.modules.java</depends>
+
+    <change-notes><![CDATA[
+        <b>Version 1.0.0</b>
+        <ul>
+            <li>support kotlin</li>
+        </ul>
+    ]]></change-notes>
+
+    <application-components>
+
+    </application-components>
+
+    <project-components>
+        <component>
+            <implementation-class>org.objectweb.asm.idea.plugin.config.ASMPluginComponent</implementation-class>
+        </component>
+    </project-components>
+
+    <actions>
+        <action class="org.objectweb.asm.idea.plugin.action.ShowBytecodeViewerAction" description="Shows the bytecode viewer and ASMified code from the current class" id="showBytecodeViewer"
+            text="ASM Bytecode Viewer">
+            <add-to-group anchor="last" group-id="EditorPopupMenu" />
+            <add-to-group anchor="last" group-id="ProjectViewPopupMenu" />
+            <add-to-group anchor="last" group-id="CodeMenu" />
+        </action>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable groupId="tools" instance="org.objectweb.asm.idea.plugin.config.PluginConfig" />
+        <toolWindow anchor="right" factoryClass="org.objectweb.asm.idea.plugin.view.BytecodeOutlineToolWindowFactory" icon="/images/asm.gif"
+            id="ASMPlugin" />
+        <projectService serviceImplementation="org.objectweb.asm.idea.plugin.view.BytecodeOutline"
+            serviceInterface="org.objectweb.asm.idea.plugin.view.BytecodeOutline" />
+        <projectService serviceImplementation="org.objectweb.asm.idea.plugin.view.BytecodeASMified"
+            serviceInterface="org.objectweb.asm.idea.plugin.view.BytecodeASMified" />
+        <projectService serviceImplementation="org.objectweb.asm.idea.plugin.view.GroovifiedView"
+            serviceInterface="org.objectweb.asm.idea.plugin.view.GroovifiedView" />
+    </extensions>
+</idea-plugin>

@@ -1,0 +1,37 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java' apply true
+    id 'idea' apply true
+    id "org.jetbrains.intellij" version "0.4.9" apply true
+}
+
+group 'org.objectweb.asm.idea.action'
+version '1.0' // Plugin version
+
+sourceCompatibility='1.8'
+idea {
+    project {
+        languageLevel = '1.8'
+    }
+}
+
+intellij {
+    pluginName 'asm-bytecode-viewer-kotlin'
+    version 'IC-2017.3' // IntelliJ IDEA dependency
+    downloadSources false
+    updateSinceUntilBuild false
+//    localPath '/Applications/IntelliJ IDEA.app'
+    pluginName 'ASM Bytecode Viewer kotlin'
+    sandboxDirectory '.sandbox'
+    dependencies {
+        compile fileTree('lib/reloc-asm-7.1.jar')
+        compile fileTree('lib/reloc-asm-commons-7.1.jar')
+        compile fileTree('lib/reloc-asm-tree-7.1.jar')
+        compile fileTree('lib/reloc-asm-util-7.1.jar')
+    }
+}

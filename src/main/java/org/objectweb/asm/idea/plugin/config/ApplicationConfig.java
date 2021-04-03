@@ -24,8 +24,8 @@ package org.objectweb.asm.idea.plugin.config;
  */
 public class ApplicationConfig {
     static final String APPLICATION_NAME = "ASM Bytecode Viewer Support Kotlin";
-    private boolean skipFrames = false;
-    private boolean skipDebug = false;
+    private boolean skipFrames = true;
+    private boolean skipDebug = true;
     private boolean skipCode = false;
     private boolean expandFrames = false;
     private GroovyCodeStyle groovyCodeStyle = GroovyCodeStyle.LEGACY;

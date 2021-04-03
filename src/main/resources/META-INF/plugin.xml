@@ -6,12 +6,16 @@
         <b>Usage: </b>
         <p>- Open ASM Bytecode Viewer from NavBar > code > ASM Bytecode Viewer</p>]]>
     </description>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <vendor>Raven</vendor>
-    <idea-version since-build="141.3058" />
+    <idea-version since-build="193.6015.39" />
     <depends>com.intellij.modules.java</depends>
-
+    
     <change-notes><![CDATA[
+        <b>Version 1.1.0</b>
+        <ul>
+            <li>bug fix</li>
+        </ul>
         <b>Version 1.0.0</b>
         <ul>
             <li>support kotlin</li>

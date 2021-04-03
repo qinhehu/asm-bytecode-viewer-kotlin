@@ -3,3 +3,7 @@ out
 .gradle
 .sandbox
 build
+.DS_Store
+/local.properties
+
+

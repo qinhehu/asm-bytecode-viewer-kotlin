@@ -39,11 +39,7 @@ import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.CompilerModuleExtension;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.OrderEnumerationHandler;
-import com.intellij.openapi.roots.OrderRootType;
-import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.roots.*;
 import com.intellij.openapi.util.BuildNumber;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -65,6 +61,7 @@ import com.sun.jna.StringArray;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.concurrency.AsyncPromise;
+import org.jetbrains.concurrency.Promise;
 import org.objectweb.asm.idea.plugin.common.Constants;
 import org.objectweb.asm.idea.plugin.common.FileTypeExtension;
 import org.objectweb.asm.idea.plugin.config.ASMPluginComponent;
@@ -88,6 +85,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.function.Consumer;
 
 
 public class ShowBytecodeViewerAction extends AnAction {
@@ -101,6 +99,7 @@ public class ShowBytecodeViewerAction extends AnAction {
         final Presentation presentation = e.getPresentation();
         if (project == null || virtualFile == null) {
             presentation.setEnabled(false);
+            Logger.getInstance(ShowBytecodeViewerAction.class).error("project == null || virtualFile == null");
             return;
         }
         final PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
@@ -112,10 +111,12 @@ public class ShowBytecodeViewerAction extends AnAction {
         Project project = e.getProject();
         PsiFile psiFile = e.getData(LangDataKeys.PSI_FILE);
         if (psiFile == null) {
+            Logger.getInstance(ShowBytecodeViewerAction.class).error("psiFile == null");
             return;
         }
         VirtualFile virtualFile = psiFile.getVirtualFile();
         if (virtualFile == null) {
+            Logger.getInstance(ShowBytecodeViewerAction.class).error("virtualFile == null");
             return;
         }
         module = ProjectRootManager.getInstance(project).getFileIndex().getModuleForFile(virtualFile);
@@ -123,12 +124,14 @@ public class ShowBytecodeViewerAction extends AnAction {
         ProjectTaskManager projectTaskManager = ProjectTaskManager.getInstance(project);
         ProjectTask buildTask = projectTaskManager.createModulesBuildTask(module, true, true, true);
 
-        projectTaskManager.run(buildTask, projectTaskResult -> {
-            if (projectTaskResult.getErrors() == 0) {
+        Logger.getInstance(ShowBytecodeViewerAction.class).info("run buildTask");
+        projectTaskManager.run(buildTask).onSuccess(result -> {
 
+            if (!result.hasErrors()) {
                 PsiClassOwner file = (PsiClassOwner) PsiManager.getInstance(project).findFile(virtualFile);
 
                 if (file == null) {
+                    Logger.getInstance(ShowBytecodeViewerAction.class).error("file == null");
                     return;
                 }
                 VirtualFile fileOutputDirectory = getOutputFile(file, virtualFile);
@@ -168,10 +171,28 @@ public class ShowBytecodeViewerAction extends AnAction {
         ArrayList<String> outputPaths = new ArrayList<String>();
 
         CompilerModuleExtension compilerExtension = CompilerModuleExtension.getInstance(module);
+        CompilerProjectExtension compilerProjectExtension = CompilerProjectExtension.getInstance(module.getProject());
         if (production) {
-            outputPaths.add(compilerExtension.getCompilerOutputPath().getPath());
+            VirtualFile moduleFile = compilerExtension.getCompilerOutputPath();
+            if (moduleFile != null) {
+                outputPaths.add(moduleFile.getPath());
+            } else {
+                Logger.getInstance(ShowBytecodeViewerAction.class).warn("moduleFile == null ");
+                VirtualFile projectFile = compilerProjectExtension.getCompilerOutput();
+                if (projectFile != null) {
+                    outputPaths.add(projectFile.getPath());
+                }
+            }
         } else {
-            outputPaths.add(compilerExtension.getCompilerOutputPathForTests().getPath());
+            VirtualFile moduleFile = compilerExtension.getCompilerOutputPathForTests();
+            if (moduleFile != null) {
+                outputPaths.add(moduleFile.getPath());
+            } else {
+                VirtualFile projectFile = compilerProjectExtension.getCompilerOutput();
+                if (projectFile != null) {
+                    outputPaths.add(projectFile.getPath());
+                }
+            }
         }
 
         ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(module);
